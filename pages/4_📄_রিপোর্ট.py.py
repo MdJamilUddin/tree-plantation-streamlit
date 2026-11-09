@@ -1,4 +1,7 @@
 # pages/4_📄_রিপোর্ট.py
+from auth import require_admin, admin_badge
+require_admin()   # অ্যাডমিন ছাড়া ঢুকতে পারবে না
+admin_badge()
 import streamlit as st
 import pandas as pd
 from database import get_all_records
