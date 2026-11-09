@@ -21,9 +21,13 @@ from schools import SCHOOLS
 @st.cache_resource(show_spinner=False)
 def get_client() -> Client:
     """Supabase ক্লায়েন্ট একবারই তৈরি হয়, সব পেজে শেয়ার হয়"""
-    url = st.secrets["supabase"]["url"]
-    key = st.secrets["supabase"]["key"]
-    return create_client(url, key)
+    try:
+        url = st.secrets["supabase"]["url"]
+        key = st.secrets["supabase"]["key"]
+        return create_client(url, key)
+    except Exception as e:
+        st.error(f"Supabase কনফিগারেশন ত্রুটি: {e}")
+        raise
 
 
 # ============================================================
@@ -89,6 +93,11 @@ def upload_photo(pil_img: Image.Image, school_index: int) -> str:
     - upsert বাদ (Storage RLS এরর এড়াতে)
     """
     try:
+        # ভ্যালিডেশন: অবজেক্টটি সত্যিই PIL Image কিনা চেক করা
+        if not isinstance(pil_img, Image.Image):
+            st.error("ত্রুটি: আপলোড করা ফাইলটি একটি বৈধ ছবি নয়।")
+            return ""
+
         client = get_client()
 
         # ---- রিসাইজ ----
@@ -122,7 +131,7 @@ def upload_photo(pil_img: Image.Image, school_index: int) -> str:
         # ---- পাবলিক URL ----
         return client.storage.from_("photos").get_public_url(filename)
     except Exception as e:
-        st.error(f"ছবি আপলোড ব্যর্থ: {e}")
+        st.error(f"ছবি আপলোড ব্যর্থ: {str(e)}")
         return ""
 
 
@@ -147,7 +156,7 @@ def save_record(data: dict, school_index: int) -> bool:
         ).execute()
         return True
     except Exception as e:
-        st.error(f"সংরক্ষণ ব্যর্থ: {e}")
+        st.error(f"সংরক্ষণ ব্যর্থ: {str(e)}")
         return False
 
 
@@ -160,7 +169,7 @@ def delete_record(school_index: int) -> bool:
         ).execute()
         return True
     except Exception as e:
-        st.error(f"মুছে ফেলা ব্যর্থ: {e}")
+        st.error(f"মুছে ফেলা ব্যর্থ: {str(e)}")
         return False
 
 
@@ -178,7 +187,7 @@ def update_counters(school_index: int, fruit: int, timber: int,
         }).eq("school_index", school_index).execute()
         return True
     except Exception as e:
-        st.error(f"আপডেট ব্যর্থ: {e}")
+        st.error(f"আপডেট ব্যর্থ: {str(e)}")
         return False
 
 
@@ -192,7 +201,7 @@ def reset_all_records() -> bool:
         ).execute()
         return True
     except Exception as e:
-        st.error(f"রিসেট ব্যর্থ: {e}")
+        st.error(f"রিসেট ব্যর্থ: {str(e)}")
         return False
 
 
@@ -208,7 +217,7 @@ def health_check() -> dict:
 
         # টেবিল
         try:
-            client.table("plantations").select("id").limit(1).execute()
+            client.table("plantations").select("school_index").limit(1).execute()
             status["table"] = True
         except Exception as e:
             status["error"] = f"টেবিল: {e}"
