@@ -14,7 +14,6 @@ from database import get_record_by_school, save_record, upload_photo
 from ui_utils import inject_css, hero, section
 from image_utils import process_upload
 
-
 # ============================================================
 # পেজ কনফিগ
 # ============================================================
@@ -24,12 +23,13 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed",
 )
+
+# স্টাইল এবং হিরো সেকশন লোড
 inject_css()
 hero(
     "📝 বিদ্যালয়ের তথ্য সংগ্রহ",
     "প্রতিটি বিদ্যালয় থেকে একবার তথ্য দিন — আগের তথ্য সম্পাদনাও করা যাবে",
 )
-
 
 # ============================================================
 # বিদ্যালয় নির্বাচন
@@ -52,7 +52,7 @@ else:
 
 
 # ============================================================
-# ভ্যালিডেশন হেল্পার
+# ভ্যালিডেশন হেল্পার (Existing ডেটা লোড করার জন্য)
 # ============================================================
 def _v(key: str, default: str = "") -> str:
     """existing থেকে মান নেওয়ার শর্টকাট"""
@@ -74,7 +74,7 @@ def _vi(key: str, default: int = 0) -> int:
 
 
 # ============================================================
-# ফর্ম
+# মূল ফর্ম
 # ============================================================
 with st.form(f"form_{school_index}", clear_on_submit=False):
 
@@ -181,7 +181,7 @@ with st.form(f"form_{school_index}", clear_on_submit=False):
 
 
 # ============================================================
-# 📷 ছবি (ফর্মের বাইরে — cropper নিজের UI চালায়)
+# 📷 ছবি (ফর্মের বাইরে — Cropper নিজের UI চালায়)
 # ============================================================
 section("📷 বৃক্ষরোপণের ছবি")
 
@@ -208,6 +208,7 @@ uploaded = st.file_uploader(
 
 cropped_img = None
 if uploaded:
+    # process_upload ফাংশনটি image_utils.py থেকে আসছে
     cropped_img, crop_err = process_upload(
         uploaded,
         ratio=None,  # ফ্রি-ক্রপ; চাইলে (4,3) বা (1,1) দিন
@@ -236,7 +237,7 @@ if submitted:
     if missing:
         st.error(f"❌ আবশ্যক ফিল্ড পূরণ করুন: {', '.join(missing)}")
     else:
-        # ---- মোবাইল নম্বর যাচাই (ঐচ্ছিক কিন্তু থাকলে সঠিক হতে হবে) ----
+        # ---- মোবাইল নম্বর যাচাই ----
         bad_mobile = None
         for val, name in [
             (student_mobile, "শিক্ষার্থীর মোবাইল"),
@@ -252,8 +253,14 @@ if submitted:
             with st.spinner("সংরক্ষণ করা হচ্ছে..."):
                 # ---- ছবি: ক্রপ করা থাকলে সেটাই আপলোড ----
                 photo_url = (existing or {}).get("photo_url", "") or ""
+                
                 if cropped_img is not None:
-                    photo_url = upload_photo(cropped_img, school_index)
+                    # image_utils থেকে আসা PIL.Image টি database.py-তে পাঠানো হচ্ছে
+                    uploaded_url = upload_photo(cropped_img, school_index)
+                    if uploaded_url:
+                        photo_url = uploaded_url
+                    else:
+                        st.warning("⚠️ ছবি আপলোড ব্যর্থ হয়েছে, তবে অন্যান্য তথ্য সংরক্ষণ করা হচ্ছে।")
 
                 # ---- ডেটা প্যাক ----
                 data = {
@@ -281,6 +288,7 @@ if submitted:
                     "photo_url": photo_url,
                 }
 
+                # ---- ডেটাবেসে সেভ ----
                 if save_record(data, school_index):
                     st.success(
                         f"✅ **{SCHOOLS[school_index]}** এর তথ্য সফলভাবে সংরক্ষিত হয়েছে!"
