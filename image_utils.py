@@ -52,11 +52,11 @@ def crop_image(uploaded_file, ratio=None, key_suffix=""):
 
     st.markdown("**✂️ ছবি ক্রপ করুন** (প্রয়োজনে অপ্রয়োজনীয় অংশ বাদ দিন)")
 
-    # 🔴 এখানে box_color পরিবর্তন করে লাল (#FF0000) করা হয়েছে 🔴
+    # 🟡 এখানে box_color পরিবর্তন করে হলুদ (#FFD700) করা হয়েছে 🟡
     cropped = st_cropper(
         img,
         realtime_update=True,
-        box_color="#FF0000",  # লাল রঙ
+        box_color="#FFD700",  # হলুদ (Golden Yellow) - রিসাইজ হ্যান্ডেল ও বর্ডার
         aspect_ratio=ratio,
         return_type="image",
         key=f"cropper_{key_suffix}",
