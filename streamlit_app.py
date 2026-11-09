@@ -18,7 +18,14 @@ st.set_page_config(
         "About": "বৃক্ষরোপণ তথ্য সংগ্রহ অ্যাপ — উপজেলা শিক্ষা অফিস, রাণীনগর, নওগাঁ",
     },
 )
-
+st.markdown("""
+<style>
+/* Streamlit expander-এর Material আইকন লুকান (_arrow_right / _arrow_down) */
+[data-testid="stIconMaterial"] {
+    display: none !important;
+}
+</style>
+""", unsafe_allow_html=True)
 # ============================================================
 # ইমপোর্ট
 # ============================================================
