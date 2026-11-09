@@ -1,4 +1,7 @@
 # pages/3_⚙️_সেটিংস.py
+from auth import require_admin, admin_badge
+require_admin()   # অ্যাডমিন ছাড়া ঢুকতে পারবে না
+admin_badge()
 import streamlit as st
 from database import get_all_records, get_client
 
