@@ -2,7 +2,7 @@
 """
 বিদ্যালয়ের তথ্য সংগ্রহ — পাবলিক ফর্ম
 - বিদ্যালয় নির্বাচন
-- ছবি আপলোড + ক্রপ + প্রিভিউ
+- ছবি আপলোড + প্রিভিউ
 - ভ্যালিডেশন + সংরক্ষণ
 """
 
@@ -181,7 +181,7 @@ with st.form(f"form_{school_index}", clear_on_submit=False):
 
 
 # ============================================================
-# 📷 ছবি (ফর্মের বাইরে — Cropper নিজের UI চালায়)
+# 📷 ছবি (ফর্মের বাইরে)
 # ============================================================
 section("📷 বৃক্ষরোপণের ছবি")
 
@@ -203,7 +203,7 @@ uploaded = st.file_uploader(
     "নতুন ছবি আপলোড করুন",
     type=["jpg", "jpeg", "png", "webp"],
     key=f"uploader_{school_index}",
-    help="JPG/PNG/WEBP • সর্বোচ্চ 10MB • আপলোডের পর ক্রপ করতে পারবেন",
+    help="JPG/PNG/WEBP • সর্বোচ্চ 10MB",
 )
 
 processed_img = None
@@ -247,15 +247,18 @@ if submitted:
             st.error(f"❌ {bad_mobile} — ১১ ডিজিটের সঠিক নম্বর দিন (01XXXXXXXXX)")
         else:
             with st.spinner("সংরক্ষণ করা হচ্ছে..."):
-                # ---- ছবি: ক্রপ করা থাকলে সেটাই আপলোড ----
+                # ---- ছবি: নতুন আপলোড থাকলে সেটাই আপলোড ----
                 photo_url = (existing or {}).get("photo_url", "") or ""
-                
-                iif processed_img is not None:
-                     uploaded_url = upload_photo(processed_img, school_index)
+
+                if processed_img is not None:
+                    # image_utils থেকে আসা PIL.Image টি database.py-তে পাঠানো হচ্ছে
+                    uploaded_url = upload_photo(processed_img, school_index)
                     if uploaded_url:
                         photo_url = uploaded_url
                     else:
-                        st.warning("⚠️ ছবি আপলোড ব্যর্থ হয়েছে, তবে অন্যান্য তথ্য সংরক্ষণ করা হচ্ছে।")
+                        st.warning(
+                            "⚠️ ছবি আপলোড ব্যর্থ হয়েছে, তবে অন্যান্য তথ্য সংরক্ষণ করা হচ্ছে।"
+                        )
 
                 # ---- ডেটা প্যাক ----
                 data = {
@@ -302,8 +305,7 @@ with st.expander("ℹ️ সহায়তা", expanded=False):
         **ছবি আপলোডের নিয়ম**
         - ফরম্যাট: JPG / PNG / WEBP
         - সর্বোচ্চ 10 MB
-        - আপলোডের পর ব্রাউজারে ক্রপ করে অপ্রয়োজনীয় অংশ বাদ দিন
-        - ছবিটি স্বয়ংক্রিয়ভাবে 1200px প্রস্থে রিসাইজ হবে
+        - আপলোড করা ছবি সরাসরি সংরক্ষিত হবে
 
         **সংরক্ষণ**
         - প্রথমবার = নতুন রেকর্ড তৈরি
