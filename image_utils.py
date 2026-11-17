@@ -46,26 +46,7 @@ def show_original_preview(uploaded_file):
         - **ফাইল সাইজ:** {size_mb:.2f} MB
         - **ফরম্যাট:** {img.format or 'JPEG'}
         """)
-
-
-# ============================================================
-# রিসাইজ ও বাফার
-# ============================================================
-def resize_for_upload(pil_img: Image.Image) -> BytesIO:
-    if pil_img.width > OUTPUT_MAX_WIDTH:
-        scale = OUTPUT_MAX_WIDTH / pil_img.width
-        pil_img = pil_img.resize(
-            (OUTPUT_MAX_WIDTH, int(pil_img.height * scale)),
-            Image.LANCZOS,
-        )
-    buf = BytesIO()
-    pil_img.convert("RGB").save(
-        buf, format="JPEG", quality=OUTPUT_QUALITY, optimize=True
-    )
-    buf.seek(0)
-    return buf
-
-
+        
 # ============================================================
 # সম্পূর্ণ প্রসেস (ক্রপ ছাড়া)
 # ============================================================
