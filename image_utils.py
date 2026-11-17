@@ -1,9 +1,8 @@
 # image_utils.py
 """
-ছবি আপলোড, প্রিভিউ, রিসাইজ — সব ইউটিলিটি
+ছবি আপলোড ও প্রিভিউ — সব ইউটিলিটি
 """
 
-from io import BytesIO
 from PIL import Image
 import streamlit as st
 
@@ -11,8 +10,6 @@ import streamlit as st
 # কনফিগারেশন
 # ============================================================
 MAX_UPLOAD_MB = 10
-OUTPUT_QUALITY = 80
-OUTPUT_MAX_WIDTH = 1200
 
 
 # ============================================================
@@ -46,9 +43,10 @@ def show_original_preview(uploaded_file):
         - **ফাইল সাইজ:** {size_mb:.2f} MB
         - **ফরম্যাট:** {img.format or 'JPEG'}
         """)
-        
+
+
 # ============================================================
-# সম্পূর্ণ প্রসেস (ক্রপ ছাড়া)
+# সম্পূর্ণ প্রসেস (ক্রপ ও রিসাইজ ছাড়া)
 # ============================================================
 def process_upload(uploaded_file):
     ok, err = validate_image(uploaded_file)
