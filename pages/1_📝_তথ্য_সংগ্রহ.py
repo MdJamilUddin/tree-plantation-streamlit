@@ -206,16 +206,12 @@ uploaded = st.file_uploader(
     help="JPG/PNG/WEBP • সর্বোচ্চ 10MB • আপলোডের পর ক্রপ করতে পারবেন",
 )
 
-cropped_img = None
+processed_img = None
 if uploaded:
-    # process_upload ফাংশনটি image_utils.py থেকে আসছে
-    cropped_img, crop_err = process_upload(
-        uploaded,
-        ratio=None,  # ফ্রি-ক্রপ; চাইলে (4,3) বা (1,1) দিন
-        key_suffix=str(school_index),
-    )
-    if crop_err:
-        st.error(f"❌ {crop_err}")
+    # process_upload এখন শুধু ভ্যালিডেশন + প্রিভিউ করে, PIL Image ফেরত দেয়
+    processed_img, img_err = process_upload(uploaded)
+    if img_err:
+        st.error(f"❌ {img_err}")
 
 
 # ============================================================
@@ -254,9 +250,8 @@ if submitted:
                 # ---- ছবি: ক্রপ করা থাকলে সেটাই আপলোড ----
                 photo_url = (existing or {}).get("photo_url", "") or ""
                 
-                if cropped_img is not None:
-                    # image_utils থেকে আসা PIL.Image টি database.py-তে পাঠানো হচ্ছে
-                    uploaded_url = upload_photo(cropped_img, school_index)
+                iif processed_img is not None:
+                     uploaded_url = upload_photo(processed_img, school_index)
                     if uploaded_url:
                         photo_url = uploaded_url
                     else:
